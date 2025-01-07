@@ -1,9 +1,12 @@
+// Parcel.java
 class Parcel {
     private String id;
     private double weight;
     private String type;
     private boolean processed;
     private double fee;
+    private ParcelStatus status;
+    private String assignedCustomerId;
 
     public Parcel(String id, double weight, String type) throws ValidationException {
         validateParcelData(id, weight, type);
@@ -12,7 +15,11 @@ class Parcel {
         this.type = type;
         this.processed = false;
         this.fee = 0.0;
+        this.status = ParcelStatus.IN_WAREHOUSE;
+        this.assignedCustomerId = null;
     }
+
+ 
 
     private void validateParcelData(String id, double weight, String type) throws ValidationException {
         if (id == null || id.trim().isEmpty()) {
@@ -43,10 +50,14 @@ class Parcel {
     public void setProcessed(boolean processed) { this.processed = processed; }
     public double getFee() { return fee; }
     public void setFee(double fee) { this.fee = fee; }
+    public ParcelStatus getStatus() { return status; }
+    public void setStatus(ParcelStatus status) { this.status = status; }
+    public String getAssignedCustomerId() { return assignedCustomerId; }
+    public void setAssignedCustomerId(String customerId) { this.assignedCustomerId = customerId; }
 
     @Override
     public String toString() {
-        return "Parcel[id=" + id + ", weight=" + weight + ", type=" + type + 
-               ", processed=" + processed + ", fee=" + fee + "]";
+        return String.format("Parcel[id=%s, weight=%.2f, type=%s, status=%s, fee=%.2f]",
+                           id, weight, type, status, fee);
     }
 }

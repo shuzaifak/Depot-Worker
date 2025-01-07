@@ -1,7 +1,11 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -129,32 +133,56 @@ class Manager {
         }
     }
 
-    public void processNextCustomer() {
-        Customer customer = customerQueue.removeCustomer();
-        if (customer == null) {
-            System.out.println("No customers in queue.");
-            return;
+    public Customer processNextCustomer() {
+        // Check if there are any customers in the queue
+        if (customerQueue.isEmpty()) {
+            return null;
         }
-
-        System.out.println("Processing customer: " + customer.getName());
-        log.addEntry("Processing customer: " + customer.getName());
-
-        if (customer.getParcels().isEmpty()) {
-            System.out.println("Customer has no parcels to process.");
-            return;
+    
+        // Get the next customer from the queue
+        Customer customer = customerQueue.peekCustomer();
+        
+        // If customer was null or has no parcels, just remove them and return
+        if (customer == null || customer.getParcels().isEmpty()) {
+            customerQueue.removeCustomer();
+            return customer;
         }
-
+    
+        // Process all parcels for this customer
         for (Parcel parcel : customer.getParcels()) {
-            try {
-                worker.processParcel(parcel);
-                System.out.println("Processed parcel " + parcel.getId() + 
-                                 " with fee: $" + String.format("%.2f", parcel.getFee()));
-            } catch (ValidationException e) {
-                System.err.println("Error processing parcel " + parcel.getId() + ": " + e.getMessage());
-            }
+            // Calculate fee based on parcel type and weight
+            double fee = calculateParcelFee(parcel);
+            parcel.setFee(fee);
+            parcel.setProcessed(true);
+            
+            // Add processing details to log
+            Log.getInstance().addEntry(String.format(
+                "Processed parcel %s for customer %s (%s) - Fee: $%.2f",
+                parcel.getId(),
+                customer.getId(),
+                customer.getName(),
+                fee
+            ));
         }
+        
+        // Remove the customer after processing
+        customerQueue.removeCustomer();
+        
+        // Return the processed customer
+        return customer;
     }
-
+    
+    private double calculateParcelFee(Parcel parcel) {
+        double baseFee = parcel.getWeight() * 2.5; // Base fee of $2.50 per kg
+        
+        // Add additional fee based on parcel type
+        return switch (parcel.getType().toLowerCase()) {
+            case "fragile" -> baseFee * 1.5;    // 50% extra for fragile items
+            case "perishable" -> baseFee * 1.3;  // 30% extra for perishable items
+            default -> baseFee;                  // Standard fee for regular parcels
+        };
+    }
+    
     private Customer findCustomer(String customerId) throws ValidationException {
         if (customerId == null || customerId.trim().isEmpty()) {
             throw new ValidationException("Customer ID cannot be empty");
@@ -189,13 +217,52 @@ class Manager {
         return foundCustomer; // Return null if not found
     }
     
-    
+      public void processAndGenerateReport(String reportFilename) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("data/" + reportFilename))) {
+            writer.println("Parcel Processing Report");
+            writer.println("Generated: " + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            writer.println("----------------------------------------");
+
+            while (!customerQueue.isEmpty()) {
+                Customer customer = customerQueue.removeCustomer();
+                writer.printf("\nProcessing customer: %s (%s)%n", customer.getName(), customer.getId());
+
+                for (Parcel parcel : customer.getParcels()) {
+                    try {
+                        worker.processParcel(parcel);
+                        parcel.setStatus(ParcelStatus.COLLECTED);
+                        writer.printf("Processed parcel %s: Fee=%.2f, Status=%s%n",
+                            parcel.getId(), parcel.getFee(), parcel.getStatus());
+                    } catch (ValidationException e) {
+                        writer.printf("Error processing parcel %s: %s%n", parcel.getId(), e.getMessage());
+                    }
+                }
+            }
+            writer.println("\nEnd of Report");
+        } catch (IOException e) {
+            log.addEntry("Error generating report: " + e.getMessage());
+        }
+    }
+
+    public void addNewParcel(String id, double weight, String type) {
+        try {
+            Parcel newParcel = new Parcel(id, weight, type);
+            parcelMap.addParcel(newParcel);
+            log.addEntry("Added new parcel: " + id);
+        } catch (ValidationException e) {
+            log.addEntry("Error adding parcel: " + e.getMessage());
+        }
+    }
+
+    public Parcel findParcelById(String id) {
+        return parcelMap.findParcel(id);
+    }
 
     public void assignParcelToCustomer(String customerId, String parcelId) {
         try {
             validateIds(customerId, parcelId);
             Customer customer = findCustomer(customerId);
-            Parcel parcel = parcelMap.getParcel(parcelId);
+            Parcel parcel = parcelMap.findParcel(parcelId);
 
             if (customer == null) {
                 throw new ValidationException("Customer not found: " + customerId);

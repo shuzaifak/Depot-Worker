@@ -1,17 +1,19 @@
+import java.time.LocalDateTime;
 import java.util.*;
 
 class Customer {
     private String id;
     private String name;
     private List<Parcel> parcels;
+    private LocalDateTime joinTime;
 
     public Customer(String id, String name) throws ValidationException {
         validateCustomerData(id, name);
         this.id = id;
         this.name = name;
         this.parcels = new ArrayList<>();
+        this.joinTime = LocalDateTime.now();
     }
-
     private void validateCustomerData(String id, String name) throws ValidationException {
         if (id == null || id.trim().isEmpty()) {
             throw new ValidationException("Customer ID cannot be empty");
@@ -32,9 +34,11 @@ class Customer {
     public String getName() { return name; }
     public List<Parcel> getParcels() { return parcels; }
     public void addParcel(Parcel parcel) { parcels.add(parcel); }
-
+      public LocalDateTime getJoinTime() { return joinTime; }
+    
     @Override
     public String toString() {
-        return "Customer[id=" + id + ", name=" + name + ", parcels=" + parcels.size() + "]";
+        return String.format("Customer[id=%s, name=%s, parcels=%d]", 
+                           id, name, parcels.size());
     }
 }

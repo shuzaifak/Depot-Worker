@@ -23,6 +23,7 @@ Loaded parcel: P012
 Loaded parcel: P013
 Loaded parcel: P014
 Loaded parcel: P015
-Assigned parcel P001 to customer John Smith
-Processing customer: John Smith
-Processed parcel P001 with fee: $11.25
+Added new customer: Khan
+Removed customer: John Smith
+Assigned parcel P002 to customer Emma Wilson
+Processed parcel P002 for customer C002 (Emma Wilson) - Fee: $6.75

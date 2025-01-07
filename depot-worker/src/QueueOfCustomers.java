@@ -1,4 +1,5 @@
 import java.util.*;
+
 class QueueOfCustomers {
     private Queue<Customer> customerQueue;
     private static final int MAX_QUEUE_SIZE = 100;
@@ -16,20 +17,20 @@ class QueueOfCustomers {
         }
         customerQueue.offer(customer);
     }
-    
-        public Customer removeCustomer() {
-            return customerQueue.poll();
-        }
-    
-        public Customer peekCustomer() {
-            return customerQueue.peek();
-        }
-    
-        public boolean isEmpty() {
-            return customerQueue.isEmpty();
-        }
-    
-        public int size() {
-            return customerQueue.size();
-        }
+
+    public Customer removeCustomer() {
+        return customerQueue.poll();
     }
+
+    public Customer peekCustomer() {
+        return customerQueue.peek();
+    }
+
+    public boolean isEmpty() {
+        return customerQueue.isEmpty();
+    }
+
+    public int size() {
+        return customerQueue.size();
+    }
+}

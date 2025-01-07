@@ -8,6 +8,16 @@ Loaded customer: David Miller
 Loaded customer: Jennifer Lee
 Loaded customer: Robert Taylor
 Loaded customer: Maria Garcia
+Loaded customer: John Smith
+Loaded customer: Emma Wilson
+Loaded customer: Michael Brown
+Loaded customer: Sarah Davis
+Loaded customer: James Johnson
+Loaded customer: Lisa Anderson
+Loaded customer: David Miller
+Loaded customer: Jennifer Lee
+Loaded customer: Robert Taylor
+Loaded customer: Maria Garcia
 Loaded parcel: P001
 Loaded parcel: P002
 Loaded parcel: P003
@@ -23,6 +33,4 @@ Loaded parcel: P012
 Loaded parcel: P013
 Loaded parcel: P014
 Loaded parcel: P015
-Assigned parcel P001 to customer John Smith
 Processing customer: John Smith
-Processed parcel P001 with fee: $11.25

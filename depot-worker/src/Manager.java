@@ -2,8 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.Collection;
 import java.util.Scanner;
 
 class Manager {
@@ -18,7 +17,22 @@ class Manager {
         worker = new Worker();
         log = Log.getInstance();
     }
+ public void addCustomerToQueue(Customer customer) throws ValidationException {
+        customerQueue.addCustomer(customer);
+        log.addEntry("Added new customer: " + customer.getName());
+    }
 
+    public Customer removeNextCustomer() {
+        Customer customer = customerQueue.removeCustomer();
+        if (customer != null) {
+            log.addEntry("Removed customer: " + customer.getName());
+        }
+        return customer;
+    }
+
+    public Collection<Parcel> getAllParcels() {
+        return parcelMap.getAllParcels();
+    }
     public void loadCustomerData(String filename) {
         if (filename == null || filename.trim().isEmpty()) {
             System.err.println("Error: Filename cannot be empty");
@@ -140,35 +154,43 @@ class Manager {
             }
         }
     }
+
     private Customer findCustomer(String customerId) throws ValidationException {
-    if (customerId == null || customerId.trim().isEmpty()) {
-        throw new ValidationException("Customer ID cannot be empty");
-    }
-    
-    if (!customerId.matches("C\\d{3}")) {
-        throw new ValidationException("Invalid customer ID format. Must be C followed by 3 digits");
-    }
-    
-    // Iterate through the queue to find the customer
-    // We need to create a temporary queue to maintain the original order
-    Queue<Customer> tempQueue = new LinkedList<>();
-    Customer foundCustomer = null;
-    
-    while (!customerQueue.isEmpty()) {
-        Customer current = customerQueue.removeCustomer();
-        if (current.getId().equals(customerId)) {
-            foundCustomer = current;
+        if (customerId == null || customerId.trim().isEmpty()) {
+            throw new ValidationException("Customer ID cannot be empty");
         }
-        ((QueueOfCustomers) tempQueue).addCustomer(current);
+    
+        if (!customerId.matches("C\\d{3}")) {
+            throw new ValidationException("Invalid customer ID format. Must be C followed by 3 digits");
+        }
+    
+        // Create a temporary queue to hold customers
+        QueueOfCustomers tempQueue = new QueueOfCustomers();
+        Customer foundCustomer = null;
+    
+        // Iterate through the original queue
+        while (!customerQueue.isEmpty()) {
+            Customer current = customerQueue.removeCustomer();
+    
+            // Check if this is the customer we are looking for
+            if (current.getId().equals(customerId)) {
+                foundCustomer = current;
+            }
+    
+            // Add the customer back to the temporary queue
+            tempQueue.addCustomer(current);
+        }
+    
+        // Restore the original queue
+        while (!tempQueue.isEmpty()) {
+            customerQueue.addCustomer(tempQueue.removeCustomer());
+        }
+    
+        return foundCustomer; // Return null if not found
     }
     
-    // Restore the original queue
-    while (!tempQueue.isEmpty()) {
-        customerQueue.addCustomer(((QueueOfCustomers) tempQueue).removeCustomer());
-    }
     
-    return foundCustomer;
-}
+
     public void assignParcelToCustomer(String customerId, String parcelId) {
         try {
             validateIds(customerId, parcelId);
@@ -271,6 +293,7 @@ class Manager {
         }
         scanner.close();
     }
+
 
 
     public static void main(String[] args) {

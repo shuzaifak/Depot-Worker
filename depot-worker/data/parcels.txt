@@ -1,0 +1,15 @@
+P001,2.5,Standard
+P002,1.8,Fragile
+P003,3.2,Perishable
+P004,4.0,Standard
+P005,0.5,Fragile
+P006,5.5,Perishable
+P007,2.2,Standard
+P008,1.1,Fragile
+P009,3.7,Perishable
+P010,2.8,Standard
+P011,1.5,Fragile
+P012,4.2,Perishable
+P013,3.0,Standard
+P014,0.8,Fragile
+P015,6.0,Perishable
